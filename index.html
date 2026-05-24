@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SlideAI - AI Presentation Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg-primary: #06060a;
+            --bg-secondary: #0c0c12;
+            --bg-card: #0f0f16;
+            --bg-card-hover: #141420;
+            --gradient-purple: #7c3aed;
+            --gradient-blue: #3b82f6;
+            --gradient-cyan: #06b6d4;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-subtle: rgba(148, 163, 184, 0.08);
+            --border-glow: rgba(124, 58, 237, 0.25);
+            --glow-purple: rgba(124, 58, 237, 0.15);
+            --glow-blue: rgba(59, 130, 246, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Noise Texture Overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.015;
+            pointer-events: none;
+            z-index: 10000;
+        }
+
+        /* Premium Navbar */
+        .navbar-custom {
+            background: rgba(6, 6, 10, 0.7);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.875rem 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .navbar-custom.scrolled {
+            background: rgba(6, 6, 10, 0.95);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-brand {
+            font-weight: 900;
+            font-size: 1.625rem;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #a78bfa 0%, var(--gradient-purple) 50%, var(--gradient-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .navbar-brand::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gradient-purple), var(--gradient-blue));
+            opacity: 0;
+            transform: scaleX(0);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover::after {
+            opacity: 1;
+            transform: scaleX(1);
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            margin: 0 0.25rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary) !important;
+            background: rgba(148, 163, 184, 0.08);
+        }
+
+        .btn-glow {
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+            border: none;
+            padding: 0.625rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 0 0 1px rgba(124, 58, 237, 0.3),
+                0 4px 16px rgba(124, 58, 237, 0.25),
+                0 8px 32px rgba(124, 58, 237, 0.15);
+        }
+
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-glow:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 0 0 1px rgba(124, 58, 237, 0.5),
+                0 8px 24px rgba(124, 58, 237, 0.35),
+                0 16px 48px rgba(124, 58, 237, 0.2);
+            color: white;
+        }
+
+        .btn-glow:hover::before {
+            left: 100%;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 100px;
+            padding-bottom: 60px;
+        }
+
+        /* Premium Gradient Mesh */
+        .gradient-mesh {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+            will-change: transform;
+        }
+
+        .orb-1 {
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--gradient-purple) 0%, transparent 70%);
+            top: -300px;
+            left: -200px;
+            animation: float-slow 20s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--gradient-blue) 0%, transparent 70%);
+            bottom: -200px;
+            right: -150px;
+            animation: float-slow 25s ease-in-out infinite reverse;
+        }
+
+        .orb-3 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--gradient-cyan) 0%, transparent 70%);
+            top: 40%;
+            left: 50%;
+            opacity: 0.2;
+            animation: float-slow 18s ease-in-out infinite;
+            animation-delay: -5s;
+        }
+
+        @keyframes float-slow {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(40px, -30px) scale(1.05); }
+            50% { transform: translate(-20px, 40px) scale(0.95); }
+            75% { transform: translate(-40px, -20px) scale(1.02); }
+        }
+
+        /* Grid Pattern */
+        .grid-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 20%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 20%, transparent 70%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(124, 58, 237, 0.1);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #a78bfa;
+            margin-bottom: 1.5rem;
+            animation: fade-in-up 0.8s ease forwards;
+        }
+
+        .hero-badge i {
+            font-size: 0.75rem;
+        }
+
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.04em;
+            animation: fade-in-up 0.8s ease forwards;
+            animation-delay: 0.1s;
+            opacity: 0;
+        }
+
+        .typewriter-text {
+            background: linear-gradient(135deg, #c4b5fd 0%, var(--gradient-purple) 40%, var(--gradient-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            min-height: 1.15em;
+        }
+
+        .typewriter-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 0.9em;
+            background: linear-gradient(180deg, var(--gradient-purple), var(--gradient-blue));
+            margin-left: 4px;
+            border-radius: 2px;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+            box-shadow: 0 0 8px var(--gradient-purple);
+        }
+
+        @keyframes blink {
+            0%, 45% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 480px;
+            line-height: 1.7;
+            animation: fade-in-up 0.8s ease forwards;
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            animation: fade-in-up 0.8s ease forwards;
+            animation-delay: 0.3s;
+            opacity: 0;
+        }
+
+        .btn-primary-hero {
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 0 0 1px rgba(124, 58, 237, 0.3),
+                0 4px 16px rgba(124, 58, 237, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 0 0 1px rgba(124, 58, 237, 0.5),
+                0 8px 32px rgba(124, 58, 237, 0.4),
+                0 16px 48px rgba(124, 58, 237, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .btn-secondary-hero {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary-hero:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(148, 163, 184, 0.2);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        /* Floating Slide Mockup */
+        .slide-mockup {
+            position: relative;
+            z-index: 1;
+            animation: fade-in-up 1s ease forwards;
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
+
+        .mockup-wrapper {
+            position: relative;
+            perspective: 1200px;
+        }
+
+        .mockup-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120%;
+            height: 120%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(ellipse at center, var(--glow-purple) 0%, transparent 60%);
+            filter: blur(40px);
+            pointer-events: none;
+        }
+
+        .mockup-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            border-radius: 20px;
+            padding: 1.75rem;
+            border: 1px solid var(--border-subtle);
+            box-shadow: 
+                0 32px 64px rgba(0, 0, 0, 0.4),
+                0 16px 32px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            animation: float-card 8s ease-in-out infinite;
+            transform-style: preserve-3d;
+            transform: rotateY(-8deg) rotateX(5deg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mockup-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        @keyframes float-card {
+            0%, 100% { transform: rotateY(-8deg) rotateX(5deg) translateY(0); }
+            50% { transform: rotateY(-8deg) rotateX(5deg) translateY(-20px); }
+        }
+
+        .mockup-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1.25rem;
+        }
+
+        .mockup-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .mockup-dot:hover {
+            transform: scale(1.2);
+        }
+
+        .dot-red { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+        .dot-yellow { background: linear-gradient(135deg, #ffd93d, #f0c929); }
+        .dot-green { background: linear-gradient(135deg, #6bcb77, #4ade80); }
+
+        .mockup-content {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(59, 130, 246, 0.08));
+            border-radius: 14px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(124, 58, 237, 0.1);
+        }
+
+        .mockup-ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+            padding: 0.375rem 0.875rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .mockup-title {
+            font-weight: 800;
+            font-size: 1.375rem;
+            margin-bottom: 0.375rem;
+            letter-spacing: -0.02em;
+        }
+
+        .mockup-subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .mockup-chart {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 10px;
+            margin-top: 1.5rem;
+            height: 80px;
+        }
+
+        .chart-bar {
+            width: 36px;
+            border-radius: 6px 6px 0 0;
+            background: linear-gradient(180deg, var(--gradient-purple), var(--gradient-blue));
+            position: relative;
+            overflow: hidden;
+            animation: bar-grow 1.5s ease-out forwards;
+            transform-origin: bottom;
+        }
+
+        .chart-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.15), transparent);
+        }
+
+        @keyframes bar-grow {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
+        }
+
+        .bar-1 { height: 35px; animation-delay: 0.2s; }
+        .bar-2 { height: 55px; animation-delay: 0.3s; }
+        .bar-3 { height: 75px; animation-delay: 0.4s; }
+        .bar-4 { height: 50px; animation-delay: 0.5s; }
+
+        /* Features Section */
+        .features-section {
+            padding: 8rem 0;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(124, 58, 237, 0.08);
+            border: 1px solid rgba(124, 58, 237, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #a78bfa;
+            margin-bottom: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(15, 15, 22, 0.5) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, var(--glow-purple) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--border-glow);
+            box-shadow: 
+                0 24px 48px rgba(0, 0, 0, 0.2),
+                0 0 0 1px var(--border-glow);
+        }
+
+        .feature-card:hover::after {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.75rem;
+            position: relative;
+            box-shadow: 
+                0 8px 24px rgba(124, 58, 237, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .feature-icon::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(8px);
+        }
+
+        .feature-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.7;
+        }
+
+        /* How It Works Section */
+        .how-section {
+            padding: 8rem 0;
+            position: relative;
+            background: linear-gradient(180deg, transparent 0%, rgba(124, 58, 237, 0.02) 50%, transparent 100%);
+        }
+
+        .steps-container {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .step-line {
+            position: absolute;
+            top: 55px;
+            left: 18%;
+            right: 18%;
+            height: 2px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 8px,
+                rgba(124, 58, 237, 0.3) 8px,
+                rgba(59, 130, 246, 0.3) 16px
+            );
+            z-index: 0;
+        }
+
+        .step-card {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            flex: 1;
+            max-width: 260px;
+            padding: 0 1rem;
+        }
+
+        .step-number-wrapper {
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 1.5rem;
+            position: relative;
+        }
+
+        .step-number-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                var(--gradient-purple),
+                var(--gradient-blue),
+                var(--gradient-cyan),
+                var(--gradient-blue),
+                var(--gradient-purple)
+            );
+            padding: 3px;
+            animation: ring-rotate 8s linear infinite;
+        }
+
+        @keyframes ring-rotate {
+            to { transform: rotate(360deg); }
+        }
+
+        .step-number-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .step-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 0.625rem;
+            letter-spacing: -0.01em;
+        }
+
+        .step-desc {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 4rem 0 2rem;
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .footer-brand {
+            font-weight: 900;
+            font-size: 1.5rem;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+            display: inline-block;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer-copyright {
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .mockup-card {
+                transform: none;
+                animation: float-card-mobile 6s ease-in-out infinite;
+            }
+
+            @keyframes float-card-mobile {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-15px); }
+            }
+
+            .steps-container {
+                flex-direction: column;
+                gap: 3rem;
+                align-items: center;
+            }
+
+            .step-line {
+                display: none;
+            }
+
+            .step-card {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .btn-primary-hero,
+            .btn-secondary-hero {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .navbar-brand {
+                font-size: 1.375rem;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">SlideAI</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list text-white fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#pricing">Pricing</a>
+                    </li>
+                </ul>
+                <a href="generator.html" class="btn btn-glow">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="gradient-mesh">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
+        </div>
+        <div class="grid-pattern"></div>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <div class="hero-badge">
+                        <i class="bi bi-stars"></i>
+                        Powered by Advanced AI
+                    </div>
+                    <h1 class="hero-title">
+                        <span class="typewriter-text" id="typewriter"></span>
+                        <span class="typewriter-cursor"></span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Transform your ideas into stunning, professional presentations in seconds. 
+                        Let AI handle the design while you focus on your message.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="generator.html" class="btn-primary-hero">
+                            <i class="bi bi-magic"></i>
+                            Create Presentation
+                        </a>
+                        <a href="#" class="btn-secondary-hero">
+                            <i class="bi bi-play-circle"></i>
+                            Watch Demo
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 slide-mockup mt-5 mt-lg-0">
+                    <div class="mockup-wrapper">
+                        <div class="mockup-glow"></div>
+                        <div class="mockup-card">
+                            <div class="mockup-header">
+                                <span class="mockup-dot dot-red"></span>
+                                <span class="mockup-dot dot-yellow"></span>
+                                <span class="mockup-dot dot-green"></span>
+                            </div>
+                            <div class="mockup-content">
+                                <div class="mockup-ai-badge">
+                                    <i class="bi bi-cpu"></i>
+                                    AI Generated
+                                </div>
+                                <h3 class="mockup-title">Q4 Sales Report</h3>
+                                <p class="mockup-subtitle">Interactive Dashboard</p>
+                                <div class="mockup-chart">
+                                    <div class="chart-bar bar-1"></div>
+                                    <div class="chart-bar bar-2"></div>
+                                    <div class="chart-bar bar-3"></div>
+                                    <div class="chart-bar bar-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <div class="section-header fade-in">
+                <div class="section-label">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    Features
+                </div>
+                <h2 class="section-title">Everything you need</h2>
+                <p class="section-subtitle">Powerful AI tools to create professional presentations effortlessly</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-cpu-fill"></i>
+                        </div>
+                        <h3 class="feature-title">AI Content Generation</h3>
+                        <p class="feature-desc">
+                            Advanced AI generates compelling content, outlines, and talking points tailored to your topic automatically.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-palette-fill"></i>
+                        </div>
+                        <h3 class="feature-title">Beautiful Themes</h3>
+                        <p class="feature-desc">
+                            Choose from dozens of professionally designed themes that make your presentations stand out from the crowd.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-in">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-cloud-arrow-down-fill"></i>
+                        </div>
+                        <h3 class="feature-title">Instant Download</h3>
+                        <p class="feature-desc">
+                            Export your presentations instantly as PPTX or PDF. Share directly with a link. No waiting required.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-section" id="how-it-works">
+        <div class="container">
+            <div class="section-header fade-in">
+                <div class="section-label">
+                    <i class="bi bi-gear-fill"></i>
+                    Process
+                </div>
+                <h2 class="section-title">How it works</h2>
+                <p class="section-subtitle">Create professional presentations in three simple steps</p>
+            </div>
+            <div class="steps-container">
+                <div class="step-line"></div>
+                <div class="step-card fade-in">
+                    <div class="step-number-wrapper">
+                        <div class="step-number-ring">
+                            <div class="step-number-inner">
+                                <span class="step-number">1</span>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="step-title">Enter Topic</h3>
+                    <p class="step-desc">Simply type your presentation topic and any specific requirements</p>
+                </div>
+                <div class="step-card fade-in">
+                    <div class="step-number-wrapper">
+                        <div class="step-number-ring">
+                            <div class="step-number-inner">
+                                <span class="step-number">2</span>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="step-title">AI Generates</h3>
+                    <p class="step-desc">Our AI creates beautiful slides with relevant content in seconds</p>
+                </div>
+                <div class="step-card fade-in">
+                    <div class="step-number-wrapper">
+                        <div class="step-number-ring">
+                            <div class="step-number-inner">
+                                <span class="step-number">3</span>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="step-title">Download</h3>
+                    <p class="step-desc">Export your polished presentation in your preferred format</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-brand">SlideAI</div>
+            <p class="footer-text">Create stunning presentations with the power of AI</p>
+            <div class="footer-links">
+                <a href="#">Features</a>
+                <a href="#">Pricing</a>
+                <a href="#">About</a>
+                <a href="#">Contact</a>
+                <a href="#">Privacy</a>
+            </div>
+            <p class="footer-copyright">2024 SlideAI. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Typewriter Effect
+        const phrases = [
+            'Turn ideas into slides',
+            'Create in seconds',
+            'Impress everyone'
+        ];
+        let phraseIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typewriterElement = document.getElementById('typewriter');
+
+        function typewrite() {
+            const currentPhrase = phrases[phraseIndex];
+            
+            if (isDeleting) {
+                typewriterElement.textContent = currentPhrase.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typewriterElement.textContent = currentPhrase.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            let typeSpeed = isDeleting ? 40 : 80;
+
+            if (!isDeleting && charIndex === currentPhrase.length) {
+                typeSpeed = 2500;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                phraseIndex = (phraseIndex + 1) % phrases.length;
+                typeSpeed = 400;
+            }
+
+            setTimeout(typewrite, typeSpeed);
+        }
+
+        typewrite();
+
+        // Navbar Scroll Effect
+        const navbar = document.querySelector('.navbar-custom');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Scroll Animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>

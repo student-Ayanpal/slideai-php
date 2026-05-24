@@ -1,0 +1,21 @@
+# Dependencies
+/vendor/
+/composer.phar
+
+# Environment variables
+.env
+
+# Logs and temporary files
+/error.log
+*.log
+temp_test.jpg
+test*.php
+test*.pptx
+test*.zip
+/ppt/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+.DS_Store

@@ -1,0 +1,19 @@
+{
+    "name": "slideai/slideai",
+    "description": "Premium AI-powered PowerPoint generator",
+    "type": "project",
+    "require": {
+        "phpoffice/phppresentation": "^1.0",
+        "vlucas/phpdotenv": "^5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "SlideAI\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "SlideAI Team"
+        }
+    ]
+}

@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Presentation is Ready - SlideAI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #06060a;
+            --bg-secondary: #0c0c12;
+            --bg-card: #0f0f16;
+            --gradient-purple: #7c3aed;
+            --gradient-blue: #3b82f6;
+            --gradient-green: #10b981;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-subtle: rgba(148, 163, 184, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Noise Texture */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.015;
+            pointer-events: none;
+            z-index: 10000;
+        }
+
+        /* Premium Confetti Animation */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            top: -20px;
+            animation: confetti-fall 5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .confetti:nth-child(1) { left: 5%; width: 10px; height: 10px; background: var(--gradient-purple); animation-delay: 0s; }
+        .confetti:nth-child(2) { left: 10%; width: 8px; height: 8px; background: var(--gradient-blue); animation-delay: 0.1s; border-radius: 50%; }
+        .confetti:nth-child(3) { left: 15%; width: 12px; height: 12px; background: #f472b6; animation-delay: 0.2s; }
+        .confetti:nth-child(4) { left: 22%; width: 6px; height: 6px; background: var(--gradient-green); animation-delay: 0.15s; border-radius: 50%; }
+        .confetti:nth-child(5) { left: 30%; width: 10px; height: 10px; background: #fbbf24; animation-delay: 0.25s; }
+        .confetti:nth-child(6) { left: 38%; width: 8px; height: 8px; background: var(--gradient-purple); animation-delay: 0.1s; border-radius: 50%; }
+        .confetti:nth-child(7) { left: 45%; width: 14px; height: 14px; background: var(--gradient-blue); animation-delay: 0.3s; }
+        .confetti:nth-child(8) { left: 52%; width: 6px; height: 6px; background: #f472b6; animation-delay: 0.05s; border-radius: 50%; }
+        .confetti:nth-child(9) { left: 60%; width: 10px; height: 10px; background: var(--gradient-green); animation-delay: 0.2s; }
+        .confetti:nth-child(10) { left: 68%; width: 8px; height: 8px; background: #fbbf24; animation-delay: 0.15s; border-radius: 50%; }
+        .confetti:nth-child(11) { left: 75%; width: 12px; height: 12px; background: var(--gradient-purple); animation-delay: 0.35s; }
+        .confetti:nth-child(12) { left: 82%; width: 6px; height: 6px; background: var(--gradient-blue); animation-delay: 0.4s; border-radius: 50%; }
+        .confetti:nth-child(13) { left: 88%; width: 10px; height: 10px; background: #f472b6; animation-delay: 0.25s; }
+        .confetti:nth-child(14) { left: 93%; width: 8px; height: 8px; background: var(--gradient-green); animation-delay: 0.45s; border-radius: 50%; }
+        .confetti:nth-child(15) { left: 3%; width: 8px; height: 8px; background: #fbbf24; animation-delay: 0.3s; }
+        .confetti:nth-child(16) { left: 25%; width: 10px; height: 10px; background: var(--gradient-purple); animation-delay: 0.5s; border-radius: 50%; }
+        .confetti:nth-child(17) { left: 48%; width: 6px; height: 6px; background: var(--gradient-blue); animation-delay: 0.35s; }
+        .confetti:nth-child(18) { left: 70%; width: 12px; height: 12px; background: #f472b6; animation-delay: 0.55s; border-radius: 50%; }
+        .confetti:nth-child(19) { left: 85%; width: 8px; height: 8px; background: var(--gradient-green); animation-delay: 0.4s; }
+        .confetti:nth-child(20) { left: 95%; width: 10px; height: 10px; background: #fbbf24; animation-delay: 0.6s; }
+
+        @keyframes confetti-fall {
+            0% {
+                top: -20px;
+                transform: translateX(0) rotateZ(0deg);
+                opacity: 1;
+            }
+            25% {
+                transform: translateX(40px) rotateZ(120deg);
+                opacity: 1;
+            }
+            50% {
+                transform: translateX(-30px) rotateZ(240deg);
+            }
+            75% {
+                transform: translateX(50px) rotateZ(320deg);
+            }
+            100% {
+                top: 110vh;
+                transform: translateX(-40px) rotateZ(400deg);
+                opacity: 0;
+            }
+        }
+
+        /* Success Banner */
+        .success-banner {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            animation: banner-entrance 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .success-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.4), transparent);
+        }
+
+        @keyframes banner-entrance {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .checkmark-circle {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--gradient-green), #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 
+                0 8px 24px rgba(16, 185, 129, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .checkmark-svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .checkmark-path {
+            stroke: white;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+            stroke-dasharray: 30;
+            stroke-dashoffset: 30;
+            animation: checkmark-draw 0.6s ease-out 0.4s forwards;
+        }
+
+        @keyframes checkmark-draw {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .success-text h2 {
+            font-weight: 800;
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--gradient-green), #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .success-text p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.9375rem;
+        }
+
+        /* Main Layout */
+        .main-container {
+            padding: 2rem;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        .content-wrapper {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .slides-section {
+            flex: 1;
+        }
+
+        .sidebar-section {
+            width: 260px;
+            flex-shrink: 0;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.875rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, var(--gradient-green), #059669);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 4px 16px rgba(16, 185, 129, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 24px rgba(16, 185, 129, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-ghost {
+            background: rgba(148, 163, 184, 0.06);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-subtle);
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(148, 163, 184, 0.1);
+            border-color: rgba(148, 163, 184, 0.15);
+            color: var(--text-primary);
+        }
+
+        .btn-presentation {
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+            color: white;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: auto;
+            box-shadow: 
+                0 4px 16px rgba(124, 58, 237, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-presentation:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 24px rgba(124, 58, 237, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        /* Slides Grid */
+        .slides-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+        }
+
+        .slide-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(15, 15, 22, 0.6) 100%);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slide-entrance 0.5s ease-out backwards;
+            position: relative;
+        }
+
+        .slide-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.08) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .slide-card:nth-child(1) { animation-delay: 0.1s; }
+        .slide-card:nth-child(2) { animation-delay: 0.15s; }
+        .slide-card:nth-child(3) { animation-delay: 0.2s; }
+        .slide-card:nth-child(4) { animation-delay: 0.25s; }
+        .slide-card:nth-child(5) { animation-delay: 0.3s; }
+        .slide-card:nth-child(6) { animation-delay: 0.35s; }
+
+        @keyframes slide-entrance {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-card:hover {
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 
+                0 24px 48px rgba(0, 0, 0, 0.25),
+                0 0 0 1px rgba(124, 58, 237, 0.15);
+            border-color: rgba(124, 58, 237, 0.25);
+        }
+
+        .slide-card:hover::before {
+            opacity: 1;
+        }
+
+        .slide-card.theme-purple .slide-top-border { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+        .slide-card.theme-blue .slide-top-border { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .slide-card.theme-green .slide-top-border { background: linear-gradient(90deg, #10b981, #34d399); }
+        .slide-card.theme-red .slide-top-border { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .slide-card.theme-orange .slide-top-border { background: linear-gradient(90deg, #f97316, #fb923c); }
+        .slide-card.theme-pink .slide-top-border { background: linear-gradient(90deg, #ec4899, #f472b6); }
+
+        .slide-top-border {
+            height: 3px;
+            background: linear-gradient(90deg, var(--gradient-purple), var(--gradient-blue));
+        }
+
+        .slide-content {
+            padding: 1.25rem;
+            position: relative;
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(59, 130, 246, 0.1));
+            color: #a78bfa;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.625rem;
+            border-radius: 6px;
+            border: 1px solid rgba(124, 58, 237, 0.15);
+        }
+
+        .slide-title {
+            font-weight: 700;
+            font-size: 1.0625rem;
+            margin-bottom: 1rem;
+            margin-top: 1.75rem;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+            line-height: 1.35;
+        }
+
+        .slide-bullets {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .slide-bullets li {
+            color: var(--text-secondary);
+            font-size: 0.8125rem;
+            padding: 0.375rem 0;
+            padding-left: 1.125rem;
+            position: relative;
+            line-height: 1.55;
+        }
+
+        .slide-bullets li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+        }
+
+        /* Stats Sidebar */
+        .stats-sidebar {
+            position: sticky;
+            top: 2rem;
+        }
+
+        .stats-title {
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(15, 15, 22, 0.8) 0%, rgba(12, 12, 18, 0.9) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 0.875rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+        }
+
+        .stat-card:hover {
+            border-color: rgba(124, 58, 237, 0.2);
+            transform: translateX(-4px);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(59, 130, 246, 0.08));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.875rem;
+            font-size: 1.125rem;
+            border: 1px solid rgba(124, 58, 237, 0.1);
+        }
+
+        .stat-value {
+            font-weight: 800;
+            font-size: 1.375rem;
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        /* Presentation Mode */
+        .presentation-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .presentation-mode.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .presentation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .presentation-nav {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: rgba(148, 163, 184, 0.08);
+            border: 1px solid var(--border-subtle);
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: rgba(148, 163, 184, 0.12);
+        }
+
+        .slide-counter {
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.9375rem;
+            padding: 0 1rem;
+        }
+
+        .btn-exit {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-exit:hover {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .presentation-slide {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .presentation-slide-number {
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+            color: white;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            padding: 0.5rem 1.25rem;
+            border-radius: 20px;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+        .presentation-slide-title {
+            font-weight: 900;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin-bottom: 2.5rem;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .presentation-slide-bullets {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        .presentation-slide-bullets li {
+            font-size: clamp(1.125rem, 2vw, 1.5rem);
+            color: var(--text-secondary);
+            padding: 0.875rem 0;
+            padding-left: 2rem;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .presentation-slide-bullets li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gradient-purple), var(--gradient-blue));
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+
+            .sidebar-section {
+                width: 100%;
+                order: -1;
+            }
+
+            .stats-sidebar {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.875rem;
+            }
+
+            .stats-title {
+                grid-column: span 2;
+            }
+
+            .stat-card {
+                margin-bottom: 0;
+            }
+
+            .slides-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .success-banner {
+                flex-direction: column;
+                text-align: center;
+                padding: 1.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-presentation {
+                margin-left: 0;
+            }
+
+            .stats-sidebar {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-title {
+                grid-column: span 1;
+            }
+
+            .presentation-slide-title {
+                font-size: 1.75rem;
+            }
+
+            .presentation-slide-bullets li {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Confetti -->
+    <div class="confetti-container">
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+    </div>
+
+    <div class="main-container">
+        <!-- Success Banner -->
+        <div class="success-banner">
+            <div class="checkmark-circle">
+                <svg class="checkmark-svg" viewBox="0 0 24 24">
+                    <path class="checkmark-path" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <div class="success-text">
+                <h2>Your presentation is ready!</h2>
+                <p>6 professional slides have been generated for your topic</p>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- Slides Section -->
+            <div class="slides-section">
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn-download">
+                        <i class="bi bi-download"></i>
+                        Download .pptx
+                    </button>
+                    <button class="btn-ghost">
+                        <i class="bi bi-arrow-repeat"></i>
+                        Regenerate
+                    </button>
+                    <button class="btn-ghost">
+                        <i class="bi bi-pencil"></i>
+                        Edit Topic
+                    </button>
+                    <button class="btn-presentation" id="presentationBtn">
+                        <i class="bi bi-play-fill"></i>
+                        Present
+                    </button>
+                </div>
+
+                <!-- Slides Grid -->
+                <div class="slides-grid">
+                    <div class="slide-card theme-purple">
+                        <div class="slide-top-border"></div>
+                        <div class="slide-content">
+                            <span class="slide-number">Slide 1</span>
+                            <h3 class="slide-title">Introduction to Machine Learning</h3>
+                            <ul class="slide-bullets">
+                                <li>Understanding the fundamentals of ML</li>
+                                <li>Key concepts and terminology</li>
+                                <li>Real-world applications overview</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="slide-card theme-purple">
+                        <div class="slide-top-border"></div>
+                        <div class="slide-content">
+                            <span class="slide-number">Slide 2</span>
+                            <h3 class="slide-title">Types of Machine Learning</h3>
+                            <ul class="slide-bullets">
+                                <li>Supervised learning approaches</li>
+                                <li>Unsupervised learning methods</li>
+                                <li>Reinforcement learning basics</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="slide-card theme-purple">
+                        <div class="slide-top-border"></div>
+                        <div class="slide-content">
+                            <span class="slide-number">Slide 3</span>
+                            <h3 class="slide-title">Data Preprocessing</h3>
+                            <ul class="slide-bullets">
+                                <li>Data cleaning and preparation</li>
+                                <li>Feature engineering techniques</li>
+                                <li>Handling missing values</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="slide-card theme-purple">
+                        <div class="slide-top-border"></div>
+                        <div class="slide-content">
+                            <span class="slide-number">Slide 4</span>
+                            <h3 class="slide-title">Popular Algorithms</h3>
+                            <ul class="slide-bullets">
+                                <li>Linear and logistic regression</li>
+                                <li>Decision trees and random forests</li>
+                                <li>Neural networks introduction</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="slide-card theme-purple">
+                        <div class="slide-top-border"></div>
+                        <div class="slide-content">
+                            <span class="slide-number">Slide 5</span>
+                            <h3 class="slide-title">Model Evaluation</h3>
+                            <ul class="slide-bullets">
+                                <li>Accuracy, precision, and recall</li>
+                                <li>Cross-validation techniques</li>
+                                <li>Avoiding overfitting</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="slide-card theme-purple">
+                        <div class="slide-top-border"></div>
+                        <div class="slide-content">
+                            <span class="slide-number">Slide 6</span>
+                            <h3 class="slide-title">Future of Machine Learning</h3>
+                            <ul class="slide-bullets">
+                                <li>Emerging trends and technologies</li>
+                                <li>Industry applications growth</li>
+                                <li>Getting started with ML projects</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Sidebar -->
+            <div class="sidebar-section">
+                <div class="stats-sidebar">
+                    <h3 class="stats-title">Generation Stats</h3>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-layers"></i>
+                        </div>
+                        <div class="stat-value">6</div>
+                        <div class="stat-label">Slides Generated</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-file-text"></i>
+                        </div>
+                        <div class="stat-value">342</div>
+                        <div class="stat-label">Words Written</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-palette"></i>
+                        </div>
+                        <div class="stat-value">Purple</div>
+                        <div class="stat-label">Theme Used</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <div class="stat-value">8.2s</div>
+                        <div class="stat-label">Time Taken</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Presentation Mode -->
+    <div class="presentation-mode" id="presentationMode">
+        <div class="presentation-header">
+            <div class="presentation-nav">
+                <button class="nav-btn" id="prevBtn">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <span class="slide-counter" id="slideCounter">1 / 6</span>
+                <button class="nav-btn" id="nextBtn">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+            <button class="btn-exit" id="exitBtn">
+                <i class="bi bi-x-lg"></i>
+                Exit
+            </button>
+        </div>
+        <div class="presentation-slide" id="presentationSlide">
+            <div class="presentation-slide-number">Slide 1 of 6</div>
+            <h1 class="presentation-slide-title">Introduction to Machine Learning</h1>
+            <ul class="presentation-slide-bullets">
+                <li>Understanding the fundamentals of ML</li>
+                <li>Key concepts and terminology</li>
+                <li>Real-world applications overview</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Slide data
+        const slides = [
+            {
+                title: 'Introduction to Machine Learning',
+                bullets: [
+                    'Understanding the fundamentals of ML',
+                    'Key concepts and terminology',
+                    'Real-world applications overview'
+                ]
+            },
+            {
+                title: 'Types of Machine Learning',
+                bullets: [
+                    'Supervised learning approaches',
+                    'Unsupervised learning methods',
+                    'Reinforcement learning basics'
+                ]
+            },
+            {
+                title: 'Data Preprocessing',
+                bullets: [
+                    'Data cleaning and preparation',
+                    'Feature engineering techniques',
+                    'Handling missing values'
+                ]
+            },
+            {
+                title: 'Popular Algorithms',
+                bullets: [
+                    'Linear and logistic regression',
+                    'Decision trees and random forests',
+                    'Neural networks introduction'
+                ]
+            },
+            {
+                title: 'Model Evaluation',
+                bullets: [
+                    'Accuracy, precision, and recall',
+                    'Cross-validation techniques',
+                    'Avoiding overfitting'
+                ]
+            },
+            {
+                title: 'Future of Machine Learning',
+                bullets: [
+                    'Emerging trends and technologies',
+                    'Industry applications growth',
+                    'Getting started with ML projects'
+                ]
+            }
+        ];
+
+        let currentSlide = 0;
+        const totalSlides = slides.length;
+
+        // DOM elements
+        const presentationMode = document.getElementById('presentationMode');
+        const presentationBtn = document.getElementById('presentationBtn');
+        const exitBtn = document.getElementById('exitBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slideCounter');
+        const presentationSlide = document.getElementById('presentationSlide');
+
+        // Show presentation mode
+        presentationBtn.addEventListener('click', () => {
+            presentationMode.classList.add('active');
+            currentSlide = 0;
+            updateSlide();
+            document.body.style.overflow = 'hidden';
+        });
+
+        // Exit presentation mode
+        exitBtn.addEventListener('click', () => {
+            presentationMode.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        // Navigation
+        prevBtn.addEventListener('click', () => {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (!presentationMode.classList.contains('active')) return;
+            
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                if (currentSlide < totalSlides - 1) {
+                    currentSlide++;
+                    updateSlide();
+                }
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateSlide();
+                }
+            } else if (e.key === 'Escape') {
+                presentationMode.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Update slide content
+        function updateSlide() {
+            const slide = slides[currentSlide];
+            slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+            
+            presentationSlide.innerHTML = `
+                <div class="presentation-slide-number">Slide ${currentSlide + 1} of ${totalSlides}</div>
+                <h1 class="presentation-slide-title">${slide.title}</h1>
+                <ul class="presentation-slide-bullets">
+                    ${slide.bullets.map(b => `<li>${b}</li>`).join('')}
+                </ul>
+            `;
+        }
+    </script>
+</body>
+</html>
